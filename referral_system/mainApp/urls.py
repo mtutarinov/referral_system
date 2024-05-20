@@ -12,5 +12,5 @@ urlpatterns = [
     path('api/referral_code_delete/<int:pk>/', ReferralCodeDelete.as_view(), name='referral_code_delete'),
     path('api/referral_register/<int:pk>/', ReferralRegister.as_view(), name='referral_register'),
     path('api/referral_list/<int:pk>/', ReferralList.as_view(), name='referral_list'),
-    re_path(r'^auth/', include('drf_social_oauth2.urls', namespace='drf')),
+    # re_path(r'^auth/', include('drf_social_oauth2.urls', namespace='drf')),
 ]

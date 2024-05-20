@@ -9,12 +9,13 @@ from django.forms.models import model_to_dict
 from .models import ReferralCode, User
 from rest_framework.renderers import JSONRenderer
 
+
 # Регистрация нового пользователя.
 class UserRegister(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (AllowAny,)
-
+    # ограничить throttling https://www.django-rest-framework.org/api-guide/throttling/
 
 # Создание юзером реферального кода.
 class ReferralCodeCreate(APIView):
@@ -68,17 +69,22 @@ class ReferralRegister(APIView):
     def post(self, request, **kwargs):
         pk = self.kwargs['pk']
         referral_code = ReferralCode.objects.get(pk=pk)
-        referrer = referral_code.user
-        referral = User.objects.create(
-            username=request.data['username'],
-            password=request.data['password'],
-            referrer=referrer
-        )
-        return Response({'referral': model_to_dict(referral)})
+        if not referral_code.is_active:
+            return Response({'response': 'This referral code is not active.'})
+        else:
+            if not referral_code.life_time():
+                return Response({'response': 'This referral code is not active.'})
+            else:
+                referrer = referral_code.user
+                referral = User.objects.create(
+                    username=request.data['username'],
+                    password=request.data['password'],
+                    referrer=referrer
+                )
+                return Response({'referral': UserSerializer(referral).data})
 
 
 class ReferralList(APIView):
-
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, **kwargs):

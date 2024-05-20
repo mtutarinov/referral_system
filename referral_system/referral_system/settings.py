@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 from datetime import timedelta
 from django.db import IntegrityError
-from settings_local import SOCIAL_AUTH_GOOGLE_OAUTH2_KEY, SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET
+# from settings_local import SOCIAL_AUTH_GOOGLE_OAUTH2_KEY, SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -185,12 +185,8 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
-DRFSO2_URL_NAMESPACE = 'mainApp'
+DRFSO2_URL_NAMESPACE = 'drf'
 DRFSO2_PROPRIETARY_BACKEND_NAME = 'Google'
 ACTIVATE_JWT = True
 
 
-SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
-    'https://www.googleapis.com/auth/userinfo.email',
-    'https://www.googleapis.com/auth/userinfo.profile',
-]
