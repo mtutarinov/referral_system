@@ -1,0 +1,9 @@
+  django
+  oauth2_provider
+  django_rest_framework
+  djangorestframework-simplejwt
+  social_django
+  social-auth-app-django
+  drf_social_oauth2
+  adrf
+  uvicorn

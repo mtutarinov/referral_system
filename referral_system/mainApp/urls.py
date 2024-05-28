@@ -1,8 +1,13 @@
 from django.urls import path, include, re_path
-from .views import *
+from django.conf.urls.static import static
+from django.conf import settings
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
+from .views import *
+
+
 app_name = 'mainApp'
+
 urlpatterns = [
     path('api/user_register/', UserRegister.as_view(), name='user_register'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
@@ -13,4 +18,4 @@ urlpatterns = [
     path('api/referral_register/<int:pk>/', ReferralRegister.as_view(), name='referral_register'),
     path('api/referral_list/<int:pk>/', AsyncReferralList.as_view(), name='referral_list'),
     # re_path(r'^auth/', include('drf_social_oauth2.urls', namespace='drf')),
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

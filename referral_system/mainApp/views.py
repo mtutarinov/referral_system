@@ -22,9 +22,10 @@ from django.contrib.auth import get_user_model
 class AsyncReferralList(AsyncAPIView):
     async def get(self, request, **kwargs):
         pk = self.kwargs['pk']
-        referrals = await User.objects.filter(referrer_id=pk)
+        referrals = User.objects.filter(referrer_id=pk)
         serializer = AsyncUserSerializer(referrals, many=True)
-        return Response({'referrals': serializer.data})
+        data = await sync_to_async(lambda: serializer.data)()
+        return Response({'referrals': data})
 
 
 # Регистрация нового пользователя.
