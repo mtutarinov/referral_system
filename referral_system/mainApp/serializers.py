@@ -1,5 +1,12 @@
 from rest_framework import serializers
 from .models import *
+from adrf.serializers import ModelSerializer as AsyncModelSerializer
+
+
+class AsyncUserSerializer(AsyncModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -32,7 +39,7 @@ class UserSerializer(serializers.ModelSerializer):
 #         return ReferralCode.objects.create(**validated_data)
 
 
-#Сериализатор с измененным методом validate
+# Сериализатор с измененным методом validate
 class ReferralCodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReferralCode
@@ -47,5 +54,3 @@ class ReferralCodeSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return ReferralCode.objects.create(**validated_data)
-
-

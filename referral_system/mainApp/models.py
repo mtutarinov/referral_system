@@ -19,6 +19,7 @@ class ReferralCode(models.Model):
         if self.is_active:
             ReferralCode.objects.filter(is_active=True, user=self.user).update(is_active=False)
         super().save()
+    # Удалить неактивные реферальные коды
 
     def life_time(self):
         if timezone.now() - self.create_date >= timezone.timedelta(minutes=60):
@@ -27,3 +28,4 @@ class ReferralCode(models.Model):
             return False
         else:
             return True
+    #время жизни кода перенести в settings, как константу
