@@ -17,6 +17,8 @@ from adrf.views import APIView as AsyncAPIView
 from django.contrib.auth import get_user_model
 
 
+# Асинхронное представление с использованием библиотеки adrf.
+# При отправке запроса выдает ошибку: object QuerySet can't be used in 'await' expression.
 class AsyncReferralList(AsyncAPIView):
     async def get(self, request, **kwargs):
         pk = self.kwargs['pk']
@@ -100,6 +102,7 @@ class ReferralRegister(APIView):
                 return Response({'referral': UserSerializer(referral).data})
 
 
+# Асинхронное предсатвление, возвращает корутину.
 class ReferralList(APIView):
     # permission_classes = (IsAuthenticated,)
 
