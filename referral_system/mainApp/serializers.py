@@ -3,9 +3,17 @@ from .models import *
 from adrf.serializers import ModelSerializer as AsyncModelSerializer
 
 
+# Асинхронный сериализатор для User
 class AsyncUserSerializer(AsyncModelSerializer):
     class Meta:
         model = User
+        fields = '__all__'
+
+
+# Асинхронный сериализатор для ReferralCode
+class AsyncReferralCodeSerializer(AsyncModelSerializer):
+    class Meta:
+        model = ReferralCode
         fields = '__all__'
 
 

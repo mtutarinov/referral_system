@@ -18,21 +18,70 @@ from django.contrib.auth import get_user_model
 
 
 # Асинхронное представление с использованием библиотеки adrf.
-# При отправке запроса выдает ошибку: object QuerySet can't be used in 'await' expression.
+# Асинхронно получаем список рефералов
 class AsyncReferralList(AsyncAPIView):
     async def get(self, request, **kwargs):
         pk = self.kwargs['pk']
-        referrals = await User.objects.filter(referrer_id=pk)
+        referrals = User.objects.filter(referrer_id=pk)
         serializer = AsyncUserSerializer(referrals, many=True)
-        return Response({'referrals': serializer.data})
+        data = await sync_to_async(lambda: serializer.data)()
+        return Response({'referrals': data})
 
 
-# Регистрация нового пользователя.
-class UserRegister(generics.CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+# Асинхронно регистрируем нового пользователя.
+class AsyncUserRegister(AsyncAPIView):
     permission_classes = (AllowAny,)
-    # ограничить throttling https://www.django-rest-framework.org/api-guide/throttling/
+
+    async def post(self, request):
+        user = await User.objects.acreate(
+            username=request.data['username'],
+            password=request.data['password']
+        )
+        serializer = AsyncUserSerializer(user)
+        data = await sync_to_async(lambda: serializer.data)()
+        return Response({'user': data})
+
+
+# Асинхронно создаем реферальный код.
+class AsyncReferralCodeListCreateView(AsyncAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    async def post(self, request):
+        referral_code = await ReferralCode.objects.acreate(
+            name=request.data['name'],
+            user=request.user,
+            is_active=False
+        )
+        serializer = AsyncReferralCodeSerializer(referral_code)
+        data = await sync_to_async(lambda: serializer.data)()
+        return Response({'referral_code': data})
+
+
+#Асинхронно удаляем реф код.
+class AsyncReferralCodeDetailUpdateDeleteView(AsyncAPIView):
+    permission_classes = (IsAuthenticated, )
+
+    async def delete(self, request, **kwargs):
+        pk = self.kwargs['pk']
+        await ReferralCode.objects.filter(pk=pk).adelete()
+        return Response({'response': 'Referral code deleted.'})
+
+#Асинхронно регисрируем реферала по коду.
+class AsyncReferralRegister(AsyncAPIView):
+    async def post(self, request, **kwargs):
+        pk = self.kwargs['pk']
+        referral_code = await ReferralCode.objects.aget(pk=pk)
+        if not referral_code.is_active or not referral_code.life_time():
+            return Response({'response': 'This referral code is not active.'})
+        referrer = referral_code.user
+        referral = await User.objects.acreate(
+            username=request.data['username'],
+            password=request.data['password'],
+            referrer=referrer
+        )
+        serializer = AsyncUserSerializer(referral)
+        data = await sync_to_async(serializer.data)()
+        return Response({'referral': data})
 
 
 # Создание юзером реферального кода.
@@ -103,37 +152,34 @@ class ReferralRegister(APIView):
 
 
 # Асинхронное предсатвление, возвращает корутину.
-class ReferralList(APIView):
-    # permission_classes = (IsAuthenticated,)
-
-    async def get(self, request, **kwargs):
-        pk = self.kwargs['pk']
-        referrals = await User.objects.filter(referrer_id=pk)
-        return Response({'referrals': UserSerializer(referrals, many=True).data})
-
-# @api_view(['GET'])
-# @permission_classes([AllowAny])
-# @authentication_classes([])
-# async def referral_list(request, pk):
-#     referrals = await User.objects.filter(referrer_id=pk)
-#     serializer = UserSerializer(referrals, many=True)
-#     return Response(data={'success': True, 'referrals': serializer.data})
+# class ReferralList(APIView):
+#     # permission_classes = (IsAuthenticated,)
+#
+#     async def get(self, request, **kwargs):
+#         pk = self.kwargs['pk']
+#         referrals = await User.objects.filter(referrer_id=pk)
+#         return Response({'referrals': UserSerializer(referrals, many=True).data})
 
 
-# @api_view(['GET'])
-# @permission_classes([AllowAny])
-# @authentication_classes([])
-# # @require_GET
-# async def referral_list(request, pk):
-#     referrals = await User.objects.filter(referrer_id=pk)
-#     task = await asyncio.create_task(referrals)
-#     return JsonResponse({'referrals': UserSerializer(task, many=True).data})
+@api_view(['GET'])
+@permission_classes([AllowAny])
+@authentication_classes([])
+async def referral_list(request, pk):
+    referrals = User.objects.filter(referrer_id=pk)
+    serializer = UserSerializer(referrals, many=True)
+    data = await sync_to_async(lambda: serializer.data)()
+    return Response({'referrals': data})
 
-# @api_view(['GET'])
-# @permission_classes([AllowAny])
-# @authentication_classes([])
-# @require_GET
-# async def referral_list(request, pk):
-#     referrals = await sync_to_async(User.objects.filter)(referrer_id=pk)
-#     serialized_data = await sync_to_async(lambda: UserSerializer(referrals, many=True).data)()
-#     return JsonResponse({'referrals': serialized_data})
+
+# Регистрация нового пользователя.
+class UserRegister(APIView):
+    permission_classes = (AllowAny,)
+
+    async def post(self, request):
+        user = await User.objects.acreate(
+            username=request.data['username'],
+            password=request.data['password']
+        )
+        serializer = UserSerializer(user)
+        data = await sync_to_async(lambda: serializer.data)()
+        return Response({'user': data})

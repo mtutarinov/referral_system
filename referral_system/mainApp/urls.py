@@ -8,9 +8,9 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
-    path('api/referral_code_create/', ReferralCodeCreate.as_view(), name='referral_code_create'),
-    path('api/referral_code_delete/<int:pk>/', ReferralCodeDelete.as_view(), name='referral_code_delete'),
+    path('api/referral_code/', AsyncReferralCodeListCreateView.as_view(), name='referral_code_create'),
+    path('api/referral_code/<int:pk>/', AsyncReferralCodeDetailUpdateDeleteView.as_view(), name='referral_code_delete'),
     path('api/referral_register/<int:pk>/', ReferralRegister.as_view(), name='referral_register'),
-    path('api/referral_list/<int:pk>/', AsyncReferralList.as_view(), name='referral_list'),
+    path('api/referral_list/<int:pk>/', referral_list, name='referral_list'),
     # re_path(r'^auth/', include('drf_social_oauth2.urls', namespace='drf')),
 ]

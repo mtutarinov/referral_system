@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'social_django',
     'drf_social_oauth2',
     'adrf',
+    'uvicorn',
+    'hypercorn',
 ]
 
 MIDDLEWARE = [
