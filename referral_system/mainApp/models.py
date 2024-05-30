@@ -5,7 +5,6 @@ from django.utils import timezone
 
 class User(AbstractUser):
     referrer = models.ForeignKey('self', on_delete=models.SET_NULL, blank=True, null=True, related_name='referrals')
-    # добавить статус юзера, чтобы при удалении, он деактивировался. Данные остаются у нас.
 
 
 class ReferralCode(models.Model):
@@ -19,13 +18,9 @@ class ReferralCode(models.Model):
             ReferralCode.objects.filter(is_active=True, user=self.user).update(is_active=False)
         super().save()
 
-    # Удалить неактивные реферальные коды
-
     def life_time(self):
         if timezone.now() - self.create_date >= timezone.timedelta(minutes=60):
             self.is_active = False
             self.save()
             return False
-        else:
-            return True
-    # время жизни кода перенести в settings, как константу
+        return True
