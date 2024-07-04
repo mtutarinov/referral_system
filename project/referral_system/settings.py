@@ -40,15 +40,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'mainApp',
+    'core',
     'rest_framework',
     'rest_framework_simplejwt',
     'oauth2_provider',
     'social_django',
     'drf_social_oauth2',
-    'adrf',
-    'uvicorn',
-    'hypercorn',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
@@ -85,6 +83,13 @@ WSGI_APPLICATION = 'referral_system.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 DATABASES = {
     'default': {
@@ -132,7 +137,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = "mainApp.User"
+AUTH_USER_MODEL = "core.User"
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -192,5 +197,3 @@ AUTHENTICATION_BACKENDS = (
 DRFSO2_URL_NAMESPACE = 'drf'
 DRFSO2_PROPRIETARY_BACKEND_NAME = 'Google'
 ACTIVATE_JWT = True
-
-
