@@ -9,7 +9,7 @@ user_router = routers.SimpleRouter()
 user_router.register(r'user', UserViewSets)
 referral_code_router = routers.SimpleRouter()
 referral_code_router.register(r'referral_code', ReferralCodeViewSets)
-
+print(referral_code_router.urls)
 
 app_name = 'core'
 urlpatterns = [
@@ -20,4 +20,5 @@ urlpatterns = [
     path('api/', include(profile_router.urls)),
     path('api/', include(referral_code_router.urls)),
     path('api/balance/<int:pk>/', BalanceRetrieveAPIView.as_view(), name='balance'),
+    path('api/referral_register/<str:uuid>/', ReferralRegister.as_view(), name='referral_register'),
 ]

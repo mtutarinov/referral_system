@@ -15,13 +15,15 @@ class UserReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('referrer', 'username', 'first_name', 'last_name', 'email', 'status', 'is_blogger',)
+        fields = ('uuid', 'referrer', 'username', 'first_name', 'last_name', 'email', 'status', 'is_blogger',)
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
+    referrer = serializers.SlugRelatedField(slug_field='username', read_only=True)
+
     class Meta:
         model = User
-        fields = ('referrer', 'username', 'first_name', 'last_name', 'email', 'status', 'is_blogger',)
+        fields = ('uuid', 'referrer', 'username', 'first_name', 'last_name', 'email', 'status', 'is_blogger',)
 
 
 class ProfileReadSerializer(serializers.ModelSerializer):
@@ -38,7 +40,8 @@ class ProfileReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = (
-            'age', 'telegram_profile', 'telegram_channel', 'telegram_subscribers', 'youtube_profile', 'youtube_channel',
+            'uuid', 'age', 'telegram_profile', 'telegram_channel', 'telegram_subscribers', 'youtube_profile',
+            'youtube_channel',
             'youtube_subscribers', 'status', 'user')
 
 
@@ -55,45 +58,31 @@ class ProfileCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = (
-            'age', 'telegram_profile', 'telegram_channel', 'telegram_subscribers', 'youtube_profile', 'youtube_channel',
+            'uuid', 'age', 'telegram_profile', 'telegram_channel', 'telegram_subscribers', 'youtube_profile',
+            'youtube_channel',
             'youtube_subscribers', 'status')
 
 
 class ReferralCodeReadSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(read_only=True)
-    user = UserReadSerializer(read_only=True)
-    create_date = serializers.DateTimeField(read_only=True)
-    is_active = serializers.BooleanField(read_only=True)
+    user = serializers.SlugRelatedField(slug_field='username', read_only=True)
 
     class Meta:
         model = ReferralCode
-        fields = ('name', 'user', 'create_date', 'is_active')
-
-
-# Сделать вложенный сериализатор для Юзеров и замерить с id или без скорость выполнения
+        fields = ('uuid', 'name', 'user', 'create_date', 'is_active')
 
 
 class ReferralCodeCreateSerializer(serializers.ModelSerializer):
-    name = serializers.CharField()
-    user = UserReadSerializer()
-    create_date = serializers.DateTimeField()
-    is_active = serializers.BooleanField()
+    user = serializers.SlugRelatedField(read_only=True, slug_field='username')
 
     class Meta:
         model = ReferralCode
-        fields = ('name', 'user', 'create_date', 'is_active')
+        fields = ('uuid', 'name', 'user', 'create_date', 'is_active')
 
 
 class BalanceSerializer(serializers.ModelSerializer):
-
     money = serializers.IntegerField()
     user = UserReadSerializer()
+
     class Meta:
         model = Balance
-        fields = ('money', 'user')
-
-
-
-
-
-# Сделать вложенный сериализатор для Юзеров и замерить с id или без скорость выполнения
+        fields = ('uuid', 'money', 'user')
