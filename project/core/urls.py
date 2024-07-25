@@ -19,6 +19,6 @@ urlpatterns = [
     path('api/', include(user_router.urls)),
     path('api/', include(profile_router.urls)),
     path('api/', include(referral_code_router.urls)),
-    path('api/balance/<int:pk>/', BalanceRetrieveAPIView.as_view(), name='balance'),
+    path('api/balance/', BalanceRetrieveAPIView.as_view(), name='balance'),
     path('api/referral_register/<str:uuid>/', ReferralRegister.as_view(), name='referral_register'),
 ]

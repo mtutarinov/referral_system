@@ -1,9 +1,8 @@
 import factory
 from faker import Faker
 
-# from core import models
 from django.db import models
-from core.models import User, ReferralCode
+from core.models import User, ReferralCode, Balance, Profile
 
 
 class ReferrerFactory(factory.django.DjangoModelFactory):
@@ -26,10 +25,33 @@ class UserFactory(factory.django.DjangoModelFactory):
 
 
 class ReferralCodeFactory(factory.django.DjangoModelFactory):
-
     class Meta:
         model = ReferralCode
 
     name = 'NNNN'
     is_active = True
+    user = factory.SubFactory(UserFactory)
+
+
+class BalanceFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Balance
+
+    value = 0
+    user = factory.SubFactory(UserFactory)
+
+
+class ProfileFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Profile
+
+    uuid = factory.Faker('uuid4')
+    age = 20
+    telegram_profile = f'@{factory.Faker("user_name")}'
+    telegram_channel = f'@{factory.Faker("user_name")}'
+    telegram_subscribers = 100
+    youtube_profile = factory.Faker("user_name")
+    youtube_channel = factory.Faker("user_name")
+    youtube_subscribers = 100
+    status = True
     user = factory.SubFactory(UserFactory)

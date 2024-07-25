@@ -27,15 +27,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
 
 class ProfileReadSerializer(serializers.ModelSerializer):
-    age = serializers.IntegerField(read_only=True)
-    telegram_profile = serializers.CharField(read_only=True)
-    telegram_channel = serializers.CharField(read_only=True)
-    telegram_subscribers = serializers.IntegerField(read_only=True)
-    youtube_profile = serializers.CharField(read_only=True)
-    youtube_channel = serializers.CharField(read_only=True)
-    youtube_subscribers = serializers.IntegerField(read_only=True)
-    status = serializers.BooleanField(read_only=True)
-    user = UserReadSerializer(read_only=True)
+    user = serializers.SlugRelatedField(slug_field='username', read_only=True)
 
     class Meta:
         model = Profile
@@ -46,21 +38,14 @@ class ProfileReadSerializer(serializers.ModelSerializer):
 
 
 class ProfileCreateSerializer(serializers.ModelSerializer):
-    age = serializers.IntegerField(write_only=True)
-    telegram_profile = serializers.CharField(write_only=True)
-    telegram_channel = serializers.CharField(write_only=True)
-    telegram_subscribers = serializers.IntegerField(write_only=True)
-    youtube_profile = serializers.CharField(write_only=True)
-    youtube_channel = serializers.CharField(write_only=True)
-    youtube_subscribers = serializers.IntegerField(write_only=True)
-    status = serializers.BooleanField(write_only=True)
+    user = serializers.SlugRelatedField(slug_field='username', read_only=True)
 
     class Meta:
         model = Profile
         fields = (
             'uuid', 'age', 'telegram_profile', 'telegram_channel', 'telegram_subscribers', 'youtube_profile',
             'youtube_channel',
-            'youtube_subscribers', 'status')
+            'youtube_subscribers', 'status', 'user')
 
 
 class ReferralCodeReadSerializer(serializers.ModelSerializer):
@@ -80,9 +65,9 @@ class ReferralCodeCreateSerializer(serializers.ModelSerializer):
 
 
 class BalanceSerializer(serializers.ModelSerializer):
-    money = serializers.IntegerField()
-    user = UserReadSerializer()
+    value = serializers.IntegerField()
+    user = serializers.SlugRelatedField(slug_field='username', read_only=True)
 
     class Meta:
         model = Balance
-        fields = ('uuid', 'money', 'user')
+        fields = ('uuid', 'value', 'user')

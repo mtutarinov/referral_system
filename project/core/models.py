@@ -54,5 +54,5 @@ class Profile(models.Model):
 
 class Balance(models.Model):
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
-    money = models.IntegerField(default=0, verbose_name='Баланс')
+    value = models.IntegerField(default=0, verbose_name='Баланс')
     user = models.OneToOneField('User', on_delete=models.CASCADE, related_name='balance', verbose_name='Пользователь')

@@ -10,6 +10,7 @@ from .models import ReferralCode, User, Profile, Balance
 from django.http import JsonResponse
 from rest_framework import viewsets
 from django.db import transaction
+from .tasks import add_money_to_referrer_referral_balance
 
 
 class UserViewSets(viewsets.ModelViewSet):
@@ -26,11 +27,15 @@ class UserViewSets(viewsets.ModelViewSet):
 class ProfileViewSets(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     lookup_field = 'uuid'
+    permission_classes = (IsAuthenticated, )
 
     def get_serializer_class(self):
         if self.request.method in ("POST", "PUT"):
             return ProfileCreateSerializer
         return ProfileReadSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
 class ReferralCodeViewSets(viewsets.ModelViewSet):
@@ -48,10 +53,11 @@ class ReferralCodeViewSets(viewsets.ModelViewSet):
 
 
 class BalanceRetrieveAPIView(RetrieveAPIView):
-    queryset = Balance.objects.all()
     serializer_class = BalanceSerializer
     permission_classes = (IsAuthenticated,)
-    lookup_field = 'uuid'
+
+    def get_object(self):
+        return Balance.objects.get(user=self.request.user)
 
 
 class ReferralRegister(CreateAPIView):
@@ -62,3 +68,4 @@ class ReferralRegister(CreateAPIView):
     @transaction.atomic
     def perform_create(self, serializer):
         serializer.save(referrer=User.objects.get(referral_codes__uuid=self.kwargs['uuid']))
+        add_money_to_referrer_referral_balance.delay(id=serializer.instance.id)
