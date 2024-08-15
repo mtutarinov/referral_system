@@ -9,7 +9,7 @@ user_router = routers.SimpleRouter()
 user_router.register(r'user', UserViewSets)
 referral_code_router = routers.SimpleRouter()
 referral_code_router.register(r'referral_code', ReferralCodeViewSets)
-print(referral_code_router.urls)
+
 
 app_name = 'core'
 urlpatterns = [

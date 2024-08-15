@@ -273,3 +273,28 @@ def test_profile_delete_authorized(user: User, api_client: APIClient, profile_ur
 def test_profile_delete_authorized(user: User, api_client: APIClient, profile_url: str, profile: Profile):
     response = api_client.delete(profile_url)
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+@pytest.mark.django_db
+def test_referral_register(api_client: APIClient, referral_register_url: str):
+    data = {
+        "username": "referral",
+        "password": "Roma1908",
+        "first_name": "referral",
+        "last_name": "refferral",
+        "email": "refferral@mail.ru",
+        "is_blogger": False
+    }
+    response = api_client.post(referral_register_url, data=data)
+    assert response.status_code == status.HTTP_201_CREATED
+    assert len(response.data) == 8
+    referral = User.objects.get(uuid=response.data['uuid'])
+    assert str(referral.uuid) == response.data['uuid']
+    assert referral.username == response.data['username']
+    assert referral.referrer.username == response.data['referrer']
+    assert referral.first_name == response.data['first_name']
+    assert referral.last_name == response.data['last_name']
+    assert referral.email == response.data['email']
+    assert referral.status == response.data['status']
+    assert referral.is_blogger == response.data['is_blogger']
+    assert referral.balance.value == 0

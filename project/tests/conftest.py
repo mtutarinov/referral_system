@@ -73,3 +73,8 @@ def profile_list_url():
 @pytest.fixture
 def profile_url(profile):
     return reverse('core:profile-detail', args=(profile.uuid,))
+
+
+@pytest.fixture
+def referral_register_url(referral_code):
+    return f'/api/referral_register/{referral_code.uuid}/'

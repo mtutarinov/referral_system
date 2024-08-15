@@ -2,8 +2,6 @@ from celery import shared_task
 from .models import User, ReferralCode, Profile, Balance
 
 
-# сделать одной таской
-
 @shared_task
 def add_money_to_referrer_referral_balance(id):
     referral = User.objects.get(id=id)
