@@ -1,0 +1,70 @@
+services:
+  backend:
+    restart: "unless-stopped"
+    build: .
+    image: backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./project:/app/
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+    command: python3 manage.py runserver 0.0.0.0:8000
+
+  db:
+    image: docker.io/postgres:alpine
+    restart: "unless-stopped"
+    ports:
+      - 5432:5432/tcp
+    environment:
+      - POSTGRES_USER=referral_system
+      - POSTGRES_PASSWORD=referral_system
+      - POSTGRES_DB=referral_system
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
+    volumes:
+      - ./.schemas:/var/lib/postgresql/data
+
+  celeryworker:
+    image: backend
+    environment:
+      - DB_HOST=db
+      - C_FORCE_ROOT=1
+    volumes:
+      - ./project:/app/
+    restart: unless-stopped
+    depends_on:
+      - db
+      - rabbitmq
+    command: celery -A referral_system  worker -l info
+
+  rabbitmq:
+    hostname: rabbitmq
+    image: rabbitmq:latest
+    ports:
+        - "5672:5672"
+        - "15672:15672"
+
+#  sl-rabbitmq:
+#    container_name: sl-rabbitmq
+#    image: rabbitmq:3.8-management-alpine
+#    restart: always
+#    ports:
+#      - "5672:5672"
+#      - "15672:15672"
+#    networks:
+#      - sl-network
+#  sl-celery:
+#    <<: *default-app
+#    container_name: sl-celery
+#    command: >
+#      bash -c "celery -A conf.celery_app worker -c 1 -l INFO \
+#                 --without-gossip \
+#                 --without-mingle \
+#                 --without-heartbeat"
+#    environment:
+#      - DJANGO_SETTINGS_MODULE=conf.settings
+#      - C_FORCE_ROOT=1
+#    depends_on:
+#      - sl-rabbitmq

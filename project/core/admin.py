@@ -5,4 +5,7 @@ from .models import *
 admin.site.register(User)
 admin.site.register(ReferralCode)
 admin.site.register(Profile)
-admin.site.register(Balance)
+
+@admin.register(Balance)
+class BalanceAdmin(admin.ModelAdmin):
+    list_display = ['value']
