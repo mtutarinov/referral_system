@@ -11,7 +11,7 @@ services:
       - db
     environment:
       - DB_HOST=db
-    command: python3 manage.py runserver 0.0.0.0:8000
+    command: gunicorn referral_system.wsgi:application --bind 0.0.0.0:8000
 
   db:
     image: docker.io/postgres:alpine
@@ -43,28 +43,17 @@ services:
     hostname: rabbitmq
     image: rabbitmq:latest
     ports:
-        - "5672:5672"
-        - "15672:15672"
+      - "5672:5672"
+      - "15672:15672"
 
-#  sl-rabbitmq:
-#    container_name: sl-rabbitmq
-#    image: rabbitmq:3.8-management-alpine
-#    restart: always
-#    ports:
-#      - "5672:5672"
-#      - "15672:15672"
-#    networks:
-#      - sl-network
-#  sl-celery:
-#    <<: *default-app
-#    container_name: sl-celery
-#    command: >
-#      bash -c "celery -A conf.celery_app worker -c 1 -l INFO \
-#                 --without-gossip \
-#                 --without-mingle \
-#                 --without-heartbeat"
-#    environment:
-#      - DJANGO_SETTINGS_MODULE=conf.settings
-#      - C_FORCE_ROOT=1
-#    depends_on:
-#      - sl-rabbitmq
+  nginx:
+    image: nginx:latest
+    restart: unless-stopped
+    volumes:
+      - ./project/nginx.conf:/etc/nginx/templates/default.conf.template
+      - ./project/static:/app/static
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
