@@ -3,7 +3,7 @@ import datetime
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView
 from rest_framework.response import Response
-from .serializers import UserReadSerializer, UserCreateSerializer, ReferralCodeReadSerializer, ProfileReadSerializer, \
+from .serializers import UserListSerializer, UserDetailSerializer, ReferralCodeReadSerializer, ProfileReadSerializer, \
     ProfileCreateSerializer, ReferralCodeCreateSerializer, BalanceSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .models import ReferralCode, User, Profile, Balance
@@ -11,17 +11,17 @@ from django.http import JsonResponse
 from rest_framework import viewsets
 from django.db import transaction
 from .tasks import add_money_to_referrer_referral_balance
-
+from .paginations import CorePagination
 
 class UserViewSets(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-
-    # lookup_field = 'uuid'
+    queryset = User.objects.all().select_related('referrer').only('uuid', 'referrer__username', 'username', 'status')
+    lookup_field = 'uuid'
+    pagination_class = CorePagination
 
     def get_serializer_class(self):
-        if self.request.method in ('POST', 'PUT'):
-            return UserCreateSerializer
-        return UserReadSerializer
+        if self.action == 'list':
+            return UserListSerializer
+        return UserDetailSerializer
 
 
 class ProfileViewSets(viewsets.ModelViewSet):
@@ -62,7 +62,7 @@ class BalanceRetrieveAPIView(RetrieveAPIView):
 
 class ReferralRegister(CreateAPIView):
     queryset = User.objects.all()
-    serializer_class = UserCreateSerializer
+    serializer_class = UserDetailSerializer
     permission_classes = (AllowAny,)
 
     @transaction.atomic

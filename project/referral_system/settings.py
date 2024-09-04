@@ -51,9 +51,11 @@ INSTALLED_APPS = [
     'social_django',
     'drf_social_oauth2',
     'django_extensions',
+    "debug_toolbar",
 ]
 
 MIDDLEWARE = [
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -122,11 +124,11 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
+TIME_ZONE = "Europe/Moscow"
 
 USE_I18N = True
+
+USE_L10N = True
 
 USE_TZ = True
 
@@ -203,3 +205,12 @@ DRFSO2_PROPRIETARY_BACKEND_NAME = 'Google'
 ACTIVATE_JWT = True
 
 CELERY_BROKER_URL = 'amqp://rabbitmq:5672'
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
+
+DEBUG_TOOLBAR_CONFIG = {
+    "SHOW_TOOLBAR_CALLBACK": lambda x: "test" not in sys.argv[0],
+}
+

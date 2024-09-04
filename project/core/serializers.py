@@ -4,21 +4,15 @@ from rest_framework import serializers
 from .models import User, ReferralCode, Profile, Balance
 
 
-class UserReadSerializer(serializers.ModelSerializer):
+class UserListSerializer(serializers.ModelSerializer):
     referrer = serializers.SlugRelatedField(slug_field='username', queryset=User.objects)
-    username = serializers.CharField(read_only=True)
-    first_name = serializers.CharField(read_only=True)
-    last_name = serializers.CharField(read_only=True)
-    email = serializers.EmailField(read_only=True)
-    status = serializers.BooleanField(read_only=True)
-    is_blogger = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = User
-        fields = ('uuid', 'referrer', 'username', 'first_name', 'last_name', 'email', 'status', 'is_blogger',)
+        fields = ('uuid', 'referrer', 'username', 'status')
 
 
-class UserCreateSerializer(serializers.ModelSerializer):
+class UserDetailSerializer(serializers.ModelSerializer):
     referrer = serializers.SlugRelatedField(slug_field='username', read_only=True)
 
     class Meta:
