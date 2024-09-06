@@ -3,8 +3,8 @@ import datetime
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView
 from rest_framework.response import Response
-from .serializers import UserListSerializer, UserDetailSerializer, ReferralCodeReadSerializer, ProfileReadSerializer, \
-    ProfileCreateSerializer, ReferralCodeCreateSerializer, BalanceSerializer
+from .serializers import UserListSerializer, UserDetailSerializer, ReferralCodeListSerializer, ProfileListSerializer, \
+    ProfileDetailSerializer, ReferralCodeDetailSerializer, BalanceListSerializer, BalanceDetailSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .models import ReferralCode, User, Profile, Balance
 from django.http import JsonResponse
@@ -13,8 +13,10 @@ from django.db import transaction
 from .tasks import add_money_to_referrer_referral_balance
 from .paginations import CorePagination
 
+
 class UserViewSets(viewsets.ModelViewSet):
-    queryset = User.objects.all().select_related('referrer').only('uuid', 'referrer__username', 'username', 'status')
+    queryset = User.objects.all().select_related('referrer').only('uuid', 'referrer__username', 'username', 'status',
+                                                                  'created_at')
     lookup_field = 'uuid'
     pagination_class = CorePagination
 
@@ -25,14 +27,17 @@ class UserViewSets(viewsets.ModelViewSet):
 
 
 class ProfileViewSets(viewsets.ModelViewSet):
-    queryset = Profile.objects.all()
+    queryset = Profile.objects.all().select_related('user', 'balance').only(
+        'uuid', 'status', 'user__username', 'balance__value', 'created_at')
     lookup_field = 'uuid'
-    permission_classes = (IsAuthenticated, )
+    pagination_class = CorePagination
+
+    # permission_classes = (IsAuthenticated, )
 
     def get_serializer_class(self):
-        if self.request.method in ("POST", "PUT"):
-            return ProfileCreateSerializer
-        return ProfileReadSerializer
+        if self.action == 'list':
+            return ProfileListSerializer
+        return ProfileDetailSerializer
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -40,24 +45,28 @@ class ProfileViewSets(viewsets.ModelViewSet):
 
 class ReferralCodeViewSets(viewsets.ModelViewSet):
     queryset = ReferralCode.objects.all()
-    permission_classes = (IsAuthenticated,)
+    # permission_classes = (IsAuthenticated,)
     lookup_field = 'uuid'
 
     def get_serializer_class(self):
-        if self.request.method in ("POST", "PUT"):
-            return ReferralCodeCreateSerializer
-        return ReferralCodeReadSerializer
+        if self.action == 'list':
+            return ReferralCodeListSerializer
+        return ReferralCodeDetailSerializer
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
 
-class BalanceRetrieveAPIView(RetrieveAPIView):
-    serializer_class = BalanceSerializer
-    permission_classes = (IsAuthenticated,)
+class BalanceViewSets(viewsets.ModelViewSet):
+    queryset = Balance.objects.all().select_related('user').only('uuid', 'user__username', 'created_at')
+    # permission_classes = (IsAuthenticated,)
+    lookup_field = 'uuid'
+    pagination_class = CorePagination
 
-    def get_object(self):
-        return Balance.objects.get(user=self.request.user)
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return BalanceListSerializer
+        return BalanceDetailSerializer
 
 
 class ReferralRegister(CreateAPIView):
@@ -69,3 +78,11 @@ class ReferralRegister(CreateAPIView):
     def perform_create(self, serializer):
         serializer.save(referrer=User.objects.get(referral_codes__uuid=self.kwargs['uuid']))
         add_money_to_referrer_referral_balance.delay(id=serializer.instance.id)
+
+
+class ReferralList(ListAPIView):
+    serializer_class = UserListSerializer
+
+    def get_queryset(self):
+        return User.objects.select_related('referrer').only('uuid', 'referrer__username', 'username', 'status',
+                                                            'created_at').filter(referrer=self.kwargs['pk'])

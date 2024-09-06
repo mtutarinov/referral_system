@@ -9,7 +9,7 @@ class UserListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('uuid', 'referrer', 'username', 'status')
+        fields = ('uuid', 'referrer', 'username', 'status', 'created_at')
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
@@ -17,10 +17,20 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('uuid', 'referrer', 'username', 'first_name', 'last_name', 'email', 'status', 'is_blogger',)
+        fields = ('uuid', 'referrer', 'username', 'first_name', 'last_name', 'email', 'status', 'is_blogger', 'created_at')
 
 
-class ProfileReadSerializer(serializers.ModelSerializer):
+class ProfileListSerializer(serializers.ModelSerializer):
+    user = serializers.SlugRelatedField(slug_field='username', read_only=True)
+    balance = serializers.SlugRelatedField(slug_field='value', read_only=True)
+
+    class Meta:
+        model = Profile
+        fields = (
+            'uuid', 'status', 'user', 'balance', 'created_at')
+
+
+class ProfileDetailSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(slug_field='username', read_only=True)
 
     class Meta:
@@ -31,26 +41,15 @@ class ProfileReadSerializer(serializers.ModelSerializer):
             'youtube_subscribers', 'status', 'user')
 
 
-class ProfileCreateSerializer(serializers.ModelSerializer):
-    user = serializers.SlugRelatedField(slug_field='username', read_only=True)
-
-    class Meta:
-        model = Profile
-        fields = (
-            'uuid', 'age', 'telegram_profile', 'telegram_channel', 'telegram_subscribers', 'youtube_profile',
-            'youtube_channel',
-            'youtube_subscribers', 'status', 'user')
-
-
-class ReferralCodeReadSerializer(serializers.ModelSerializer):
+class ReferralCodeListSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(slug_field='username', read_only=True)
 
     class Meta:
         model = ReferralCode
-        fields = ('uuid', 'name', 'user', 'create_date', 'is_active')
+        fields = ('uuid', 'user', 'create_date')
 
 
-class ReferralCodeCreateSerializer(serializers.ModelSerializer):
+class ReferralCodeDetailSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(read_only=True, slug_field='username')
 
     class Meta:
@@ -58,10 +57,16 @@ class ReferralCodeCreateSerializer(serializers.ModelSerializer):
         fields = ('uuid', 'name', 'user', 'create_date', 'is_active')
 
 
-class BalanceSerializer(serializers.ModelSerializer):
-    value = serializers.IntegerField()
+class BalanceListSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(slug_field='username', read_only=True)
 
     class Meta:
         model = Balance
-        fields = ('uuid', 'value', 'user')
+        fields = ('uuid', 'user', 'created_at')
+
+class BalanceDetailSerializer(serializers.ModelSerializer):
+    user = serializers.SlugRelatedField(slug_field='username', read_only=True)
+
+    class Meta:
+        model = Balance
+        fields = ('uuid', 'user', 'created_at', 'value')
